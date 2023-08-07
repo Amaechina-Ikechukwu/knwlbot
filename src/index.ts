@@ -1,4 +1,4 @@
-import { onRequest } from "firebase-functions/v2/https";
+// import { onRequest } from "firebase-functions/v2/https";
 import express from "express";
 import request from "request";
 import { callOpenAIComplete } from "../controllers/openai/openaihttp";
