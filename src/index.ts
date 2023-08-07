@@ -134,7 +134,7 @@ app.get("/news", async (request, res) => {
 });
 const refuseToSleep = () => {
   const intervalId = setInterval(() => {
-    console.log("awaken");
+    console.log("awaken again");
   }, 1800000); // 30 minutes in milliseconds
 
   // Stop the interval after 2 hours (7,200 seconds)
