@@ -18,7 +18,8 @@
     "dotenv": "^16.3.1",
     "firebase-admin": "^11.8.0",
     "firebase-functions": "^4.3.1",
-    "node-readability": "^3.0.0"
+    "node-readability": "^3.0.0",
+    "pg": "^8.11.2"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
