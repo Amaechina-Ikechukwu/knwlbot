@@ -1,22 +1,24 @@
 import axios from "axios";
-import { createClient } from "@supabase/supabase-js";
+// import { createClient } from "@supabase/supabase-js";
+import supabase from "../../supabase";
 import ChatController from "../database/getchats";
 import dotenv from "dotenv";
 dotenv.config();
 const API_KEY: string =
   "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" || " ";
 const API_ENDPOINT = "https://api.openai.com/v1/chat/completions";
-const url: string = "https://uozlshbqcnhtbhrlhiqj.supabase.co";
-const supabaseKey: string =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvemxzaGJxY25odGJocmxoaXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODQ0NjAwOTIsImV4cCI6MjAwMDAzNjA5Mn0.nT1AcwTyfyjx9AmOBBgouJHt7nNFlZWoCZ5JsbBMSyo" ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvemxzaGJxY25odGJocmxoaXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODQ0NjAwOTIsImV4cCI6MjAwMDAzNjA5Mn0.nT1AcwTyfyjx9AmOBBgouJHt7nNFlZWoCZ5JsbBMSyo";
-const supabase = createClient(url, supabaseKey);
-const getchat = new ChatController(supabase);
+// const url: string = "https://uozlshbqcnhtbhrlhiqj.supabase.co";
+// const supabaseKey: string =
+//   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvemxzaGJxY25odGJocmxoaXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODQ0NjAwOTIsImV4cCI6MjAwMDAzNjA5Mn0.nT1AcwTyfyjx9AmOBBgouJHt7nNFlZWoCZ5JsbBMSyo" ||
+//   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvemxzaGJxY25odGJocmxoaXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODQ0NjAwOTIsImV4cCI6MjAwMDAzNjA5Mn0.nT1AcwTyfyjx9AmOBBgouJHt7nNFlZWoCZ5JsbBMSyo";
+// const supabase = createClient(url, supabaseKey);
+
 export async function callOpenAIComplete(
   prompt: string,
   tablename: string
 ): Promise<string | null> {
   try {
+    const getchat = new ChatController(supabase);
     const headers = {
       "Content-Type": "application/json",
       Authorization: `Bearer ${API_KEY}`,

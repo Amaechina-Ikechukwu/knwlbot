@@ -3,38 +3,25 @@ import express from "express";
 import request from "request";
 import { callOpenAIComplete } from "../controllers/openai/openaihttp";
 import { storeChats } from "../controllers/database/storechats";
+var admin = require("firebase-admin");
 import dotenv from "dotenv";
 import WebSearching from "../actions/websearch";
-
+import Weather from "../controllers/weather/index";
 import NewsSection from "./newsection";
 const searches = new WebSearching();
 const newsection = new NewsSection();
 dotenv.config();
 const app = express();
 const VERIFY_TOKEN = "knwl";
-// const PAGE_ACCESS_TOKEN =
-//   "EAANJhGNj90MBALwFgzV8IyjWjprJMLHgnIjPbxUuanoopnulosGszZCxXEa4HvI9MuLZBAidy5xPeymReXLLQFDhEqgE3685XFAPymbGGsZCyVrbI9OIwNy10NjDhf61n0Vhk3A9lj509ItzRsTCPZBp3OoosQfjiRM7f5psJphY4WDPgels";
 
 app.use(express.json());
 
-// const options = {
-//   uri: "https://graph.facebook.com/v13.0/me/subscribed_apps",
-//   qs: {
-//     access_token: PAGE_ACCESS_TOKEN,
-//     subscribed_fields:
-//       "messages,message_reads,message_deliveries,messaging_postbacks,messaging_optins,messaging_account_linking,messaging_referrals,standby,message_reactions,message_attachments",
-//   },
-//   method: "POST",
-//   json: true,
-// };
+var serviceAccount = require("../odezssa.json");
 
-// request(options, (error: any, response: any, body: any) => {
-//   if (!error && response.statusCode === 200) {
-//     console.log("Subscribed to page events successfully");
-//   } else {
-//     console.error("Failed to subscribe to page events:", error);
-//   }
-// });
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://odezssa-default-rtdb.firebaseio.com",
+});
 
 async function handleMessage(senderId: any, message: any) {
   const answer = await callOpenAIComplete(message.text, `chat${senderId}`);
@@ -72,6 +59,27 @@ const newsPhrases: string[] = [
   "whats up",
   "whats happening",
 ];
+const weatherPhrases: string[] = [
+  "hows today?",
+  "Weather",
+  "weather?",
+  "whats the weather",
+  "whats the weather?",
+  "weather",
+  "hows today",
+  "how is today",
+  "hows the sky",
+  "whats happening",
+];
+function removeLastWordIgnorePunctuation(inputString: string) {
+  // Match the last word followed by optional punctuation
+  const regex = /([\w'-]+)[^\w'-]*$/;
+
+  // Use the regex to find the match and remove it
+  const result = inputString?.replace(regex, "").trim();
+
+  return result;
+}
 function callSendAPI(response: any) {
   request(
     {
@@ -108,18 +116,24 @@ app.post("/webhook", (req: any, res: any) => {
 
       if (webhookEvent.message) {
         storeChats(webhookEvent);
-        console.log(
-          newsPhrases.includes(webhookEvent.message.text.toLowerCase())
-        );
-        if (newsPhrases.includes(webhookEvent.message.text.toLowerCase())) {
+
+        if (newsPhrases.includes(webhookEvent.message.text?.toLowerCase())) {
           await newsection.getNews(
             webhookEvent.sender.id,
             webhookEvent.message
           );
+        } else if (
+          weatherPhrases.includes(
+            removeLastWordIgnorePunctuation(
+              webhookEvent.message.text?.toLowerCase()
+            )
+          )
+        ) {
+          console.log(webhookEvent);
+          await Weather(webhookEvent);
         } else {
           handleMessage(webhookEvent.sender.id, webhookEvent.message);
         }
-        console.log(webhookEvent.message.nlp);
       } else if (webhookEvent.postback) {
         handlePostback(webhookEvent.sender.id, webhookEvent.postback);
       }
@@ -135,13 +149,9 @@ app.get("/news", async (request, res) => {
 const refuseToSleep = () => {
   const intervalId = setInterval(() => {
     console.log("awaken again");
-  }, 1800000); // 30 minutes in milliseconds
+  }, 3600000); // 30 minutes in milliseconds
 
-  // Stop the interval after 2 hours (7,200 seconds)
-  setTimeout(() => {
-    clearInterval(intervalId);
-    console.log("I shall sleep now.");
-  }, 7200000); // 2 hours in milliseconds
+  // 2 hours in milliseconds
 };
 
 refuseToSleep();
